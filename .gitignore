@@ -1,0 +1,37 @@
+HELP.md
+.gradle
+build/
+bin/*
+FISCO-BCOS/nodes/127.0.0.1/node0/log/*
+FISCO-BCOS/nodes/127.0.0.1/node1/log/*
+FISCO-BCOS/nodes/127.0.0.1/node2/log/*
+FISCO-BCOS/nodes/127.0.0.1/node3/log/*
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
