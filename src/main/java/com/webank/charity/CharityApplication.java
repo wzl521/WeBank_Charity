@@ -412,20 +412,7 @@ public class CharityApplication {
             return null;
         }
 
-=======
-    // id: 账户ID
-    // name: 项目名
-    // string: 描述
-    // target: 目标金额
-    // 返回: 项目ID
-    @RequestMapping("/publish")
-    public BigInteger publish(@RequestParam(value = "id") BigInteger id,
-                              @RequestParam(value = "name", required = true) String name,
-                              @RequestParam(value = "describe", defaultValue = "No description.") String describe,
-                              @RequestParam(value = "target", required = true) BigInteger target) {
->>>>>>> 692bd8739fdd695f355756e707411dfd03c0064c
-        return new BigInteger("0");
-    }
+
 
     // 下架项目
     // id: 项目ID
