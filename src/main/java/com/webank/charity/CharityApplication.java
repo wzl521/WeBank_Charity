@@ -207,26 +207,172 @@ public class CharityApplication {
         }
     }
 
-    //返回用户信息
+    //返回用户name
     // privateKey: 私钥
-    // 返回: 用户信息（name,phone,balance,ownItemsId,ownItemsId）
-    @GetMapping("/getUserInfo")
-    public String getUserInfo(@RequestParam(value = "privateKey", required=true) String privateKey
+    // 返回: 用户信息name
+    @GetMapping("/getUserName")
+    public String getUserName(@RequestParam(value = "privateKey", required=true) String privateKey
     ) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //通过指定外部账户私钥使用指定的外部账户
         Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
 
         try {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
-            return charity.getUserInfo().send().getOutput();
+            String name=charity.getName().send().getOutput();
+            return name;
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
             return null;
         }
-
     }
+
+    //返回用户phone
+    // privateKey: 私钥
+    // 返回: 用户phone
+    @GetMapping("/getUserPhone")
+    public String getUserPhone(@RequestParam(value = "privateKey", required=true) String privateKey
+    ) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+            String phone=charity.getPhone().send().getOutput();
+            return phone;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+    //返回用户balance
+    // privateKey: 私钥
+    // 返回: 用户balance
+    @GetMapping("/getUserBalance")
+    public String getUserInfo(@RequestParam(value = "privateKey", required=true) String privateKey
+    ) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+            String balance=charity.getBalance().send().getOutput();
+            return balance;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+    //返回用户ownItemsId
+    // privateKey: 私钥
+    // 返回: 用户ownItemsId
+    @GetMapping("/getUserOwnItemsId")
+    public String getUserOwnItemsId(@RequestParam(value = "privateKey", required=true) String privateKey
+    ) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+            String ownItemsId=charity.getOwnItemsId().send().getOutput();
+            return ownItemsId;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+    //返回用户PartItemsId
+    // privateKey: 私钥
+    // 返回: 用户PartItemsId
+    @GetMapping("/getUserPartItemsId")
+    public String getUserPartItemsId(@RequestParam(value = "privateKey", required=true) String privateKey
+    ) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+            String partItemsId=charity.getpartItemsId().send().getOutput();
+            return partItemsId;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+
 
     // 发起项目
     // id: 账户ID
