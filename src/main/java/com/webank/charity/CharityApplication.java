@@ -159,13 +159,73 @@ public class CharityApplication {
     // phone: 电话
     // location: 地址
     // email: 邮箱
-    // 返回: 错误信息
+    // 返回: 私钥
     @GetMapping("/gen_account")
     public String genAccount(@RequestParam(value = "name", required=true) String name,
                            @RequestParam(value = "phone", required=true) String phone,
                            @RequestParam(value = "location", required=true) String location,
-                           @RequestParam(value = "email", required=true) String email) {
-        return new String("Successful.");
+                           @RequestParam(value = "email", required=true) String email) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //创建普通账户
+        EncryptType.encryptType = 0;
+        Credentials credentials = GenCredential.create();
+        //账户地址
+        String address = credentials.getAddress();
+        //账户私钥
+        String privateKey = credentials.getEcKeyPair().getPrivateKey().toString(16);
+        //账户公钥
+        String publicKey = credentials.getEcKeyPair().getPublicKey().toString(16);
+
+        try {
+            Charity asset = Charity.deploy(web3j, credentials, new StaticGasProvider(gasPrice, gasLimit)).send();
+            String contractAddress;
+            contractAddress = asset.getContractAddress();
+            System.out.println(" deploy Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+            asset.registerUser(name, phone, location, email);
+        } catch (Exception e2) {
+            System.out.println(" deploy Charity contract failed, error message is  " + e2.getMessage());
+        }
+
+        //return new String("Successful.");
+        return privateKey;
+    }
+
+    //登陆接口
+    // privateKey: 私钥
+    // 返回: 登陆信息
+    @GetMapping("/login")
+    public String login(@RequestParam(value = "privateKey", required=true) String privateKey
+                             ) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+        //账户公钥
+        String publicKey = credentials.getEcKeyPair().getPublicKey().toString(16);
+        if(credentials!=null) {
+            return new String("Successful.");
+        }
+        else{
+            return new String("Fail.");
+        }
     }
 
     // 发起项目
