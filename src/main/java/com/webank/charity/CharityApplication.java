@@ -3,7 +3,9 @@ package com.webank.charity;
 import com.alibaba.druid.sql.visitor.functions.Char;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.charity.contract.Charity;
@@ -31,6 +33,10 @@ import java.util.Properties;
 @SpringBootApplication
 @RestController
 public class CharityApplication {
+    CharityApplication() throws Exception {
+        initialize();
+    }
+
     // 此处是照办asset app的部分
     private Web3j web3j;
 
@@ -41,7 +47,7 @@ public class CharityApplication {
     private static BigInteger gasPrice = new BigInteger("30000000");
     private static BigInteger gasLimit = new BigInteger("30000000");
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception {
         SpringApplication.run(CharityApplication.class, args);
     }
 
@@ -140,17 +146,7 @@ public class CharityApplication {
     // 测试用页面
     @GetMapping("/test")
     public String test() throws Exception  {
-        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
-        Service service = context.getBean(Service.class);
-        service.run();
-        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setChannelService(service);
-
-        //获取Web3j对象
-        Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
-        //通过Web3j对象调用API接口getBlockNumber
         BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();
-
         return String.format("Block Number: %d!", blockNumber);
     }
 
@@ -164,16 +160,7 @@ public class CharityApplication {
     public String genAccount(@RequestParam(value = "name", required=true) String name,
                            @RequestParam(value = "phone", required=true) String phone,
                            @RequestParam(value = "location", required=true) String location,
-                           @RequestParam(value = "email", required=true) String email) throws Exception {
-        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
-        Service service = context.getBean(Service.class);
-        service.run();
-
-        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setChannelService(service);
-        // 初始化Web3j对象
-        Web3j web3j = Web3j.build(channelEthereumService, 1);
-
+                           @RequestParam(value = "email", required=true) String email) {
         //创建普通账户
         EncryptType.encryptType = 0;
         Credentials credentials = GenCredential.create();
@@ -204,15 +191,6 @@ public class CharityApplication {
     @GetMapping("/login")
     public String login(@RequestParam(value = "privateKey", required=true) String privateKey
                              ) throws Exception {
-        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
-        Service service = context.getBean(Service.class);
-        service.run();
-
-        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setChannelService(service);
-        // 初始化Web3j对象
-        Web3j web3j = Web3j.build(channelEthereumService, 1);
-
         //通过指定外部账户私钥使用指定的外部账户
         Credentials credentials = GenCredential.create(privateKey);
         //账户地址
@@ -223,7 +201,7 @@ public class CharityApplication {
             return new String("Successful.");
         }
         else{
-            return new String("Fail.");
+            return new String("Failed.");
         }
     }
 
