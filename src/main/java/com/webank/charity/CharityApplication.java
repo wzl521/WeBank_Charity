@@ -221,11 +221,7 @@ public class CharityApplication {
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
-<<<<<<< HEAD
             String name=charity.getName().send();
-=======
-            String name=charity.getName();
->>>>>>> 2459dcc27beb2bae352cf3b5318fcacc374ff5aa
             return name;
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
@@ -358,7 +354,7 @@ public class CharityApplication {
     //             0 项目注册成功
     //            -1 项目id已存在
     //            -2 其他错误
-    @RequestMapping("/publish/{id}")
+    @RequestMapping("/publish")
     public BigInteger publish(@RequestParam(value = "privateKey", required=true) String privateKey,
                               @RequestParam(value = "item_id", required = true) BigInteger item_id,
                               @RequestParam(value = "publisher_name", required = true) String publisher_name,
@@ -366,7 +362,7 @@ public class CharityApplication {
                               @RequestParam(value = "beneficiary_name", required = true) String beneficiary_name,
                               @RequestParam(value = "target_amount", required = true) BigInteger target,
                               @RequestParam(value = "description", defaultValue = "No description.") String description)
-            throws Exception {
+            {
         //通过指定外部账户私钥使用指定的外部账户
         Credentials credentials = GenCredential.create(privateKey);
         //账户地址
