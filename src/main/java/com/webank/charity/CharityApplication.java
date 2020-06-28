@@ -393,7 +393,7 @@ public class CharityApplication {
                               @RequestParam(value = "beneficiary_name", required = true) String beneficiary_name,
                               @RequestParam(value = "target_amount", required = true) BigInteger target,
                               @RequestParam(value = "description", defaultValue = "No description.") String description)
-            throws Exception{
+            throws Exception {
         //通过指定外部账户私钥使用指定的外部账户
         Credentials credentials = GenCredential.create(privateKey);
         //账户地址
@@ -410,14 +410,15 @@ public class CharityApplication {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
             return null;
         }
-
+    }
 
 
     // 下架项目
     // id: 项目ID
     // 返回: 错误信息
-    @GetMapping("/withdraw")
-    public String withdraw(@RequestParam(value = "id", required = true) BigInteger id) {
+    @RequestMapping("/withdraw")
+    public String withdraw(@RequestParam(value = "privateKey", required=true) String privateKey,
+                @RequestParam(value = "item_id", required = true) BigInteger item_id) {
         return new String("Successful");
     }
 
