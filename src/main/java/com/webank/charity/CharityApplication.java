@@ -2,6 +2,7 @@ package com.webank.charity;
 
 import com.alibaba.druid.sql.visitor.functions.Char;
 import org.fisco.bcos.channel.client.Service;
+import org.fisco.bcos.charity.contract.Item;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Keys;
@@ -9,6 +10,7 @@ import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.charity.contract.Charity;
+import org.fisco.bcos.charity.contract.Item;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.slf4j.Logger;
@@ -34,7 +36,7 @@ public class CharityApplication {
         initialize();
     }
 
-    // 此处是照办asset app的部分
+    // 此处是照搬asset app的部分
     private Web3j web3j;
 
     private Credentials s_credentials;
@@ -219,7 +221,11 @@ public class CharityApplication {
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
+<<<<<<< HEAD
             String name=charity.getName().send();
+=======
+            String name=charity.getName();
+>>>>>>> 2459dcc27beb2bae352cf3b5318fcacc374ff5aa
             return name;
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
@@ -342,24 +348,68 @@ public class CharityApplication {
 
 
     // 发起项目
-    // id: 账户ID
-    // name: 项目名
-    // string: 描述
-    // target: 目标金额
-    // 返回: 项目ID
-    @RequestMapping("/publish")
-    public BigInteger publish(@RequestParam(value = "id") BigInteger id,
-                              @RequestParam(value = "name", required = true) String name,
-                              @RequestParam(value = "describe", defaultValue = "No description.") String describe,
-                              @RequestParam(value = "target", required = true) BigInteger target) {
-        return new BigInteger("0");
+    //    item_id: 项目ID int
+    //    publisher_name : 发起人 string
+    //    item_name  : 项目名称 string
+    //    beneficiary_name : 受益人 string
+    //    target_amount : 目标金额 int
+    //    description : 描述 string
+    // 返回:
+    //             0 项目注册成功
+    //            -1 项目id已存在
+    //            -2 其他错误
+    @RequestMapping("/publish/{id}")
+    public BigInteger publish(@RequestParam(value = "privateKey", required=true) String privateKey,
+                              @RequestParam(value = "item_id", required = true) BigInteger item_id,
+                              @RequestParam(value = "publisher_name", required = true) String publisher_name,
+                              @RequestParam(value = "item_name", required = true) String item_name,
+                              @RequestParam(value = "beneficiary_name", required = true) String beneficiary_name,
+                              @RequestParam(value = "target_amount", required = true) BigInteger target,
+                              @RequestParam(value = "description", defaultValue = "No description.") String description)
+            throws Exception {
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+
+
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
     }
+
 
     // 下架项目
     // id: 项目ID
     // 返回: 错误信息
-    @GetMapping("/withdraw")
-    public String withdraw(@RequestParam(value = "id", required = true) BigInteger id) {
+    @RequestMapping("/cancelItem")
+    public String cancelItem(@RequestParam(value = "privateKey", required=true) String privateKey,
+                             @RequestParam(value = "item_id", required = true) BigInteger item_id)
+            throws Exception{
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            Item item = Item.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+
+
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
         return new String("Successful");
     }
 
