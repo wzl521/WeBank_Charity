@@ -375,7 +375,6 @@ public class CharityApplication {
 
 
     // 发起项目
-<<<<<<< HEAD
     //    item_id: 项目ID int
     //    publisher_name : 发起人 string
     //    item_name  : 项目名称 string
