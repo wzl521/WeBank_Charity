@@ -179,7 +179,7 @@ public class CharityApplication {
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
-            charity.registerUser(name, phone, location, email);
+            charity.registerUser(name, phone);
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
         }
