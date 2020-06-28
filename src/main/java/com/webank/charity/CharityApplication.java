@@ -25,10 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.BitSet;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.*;
 
 @SpringBootApplication
 @RestController
@@ -178,8 +175,9 @@ public class CharityApplication {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
-            recordAssetAddr(contractAddress);
-            charity.registerUser(name, phone);
+            TransactionReceipt trans= charity.registerUser(name, phone).send();
+            List<Charity.RegisterUserEventEventResponse> responses = charity.getRegisterUserEventEvents(trans);
+            return privateKey;
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
         }
@@ -213,26 +211,15 @@ public class CharityApplication {
     @GetMapping("/getUserName")
     public String getUserName(@RequestParam(value = "privateKey", required=true) String privateKey
     ) throws Exception {
-        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
-        Service service = context.getBean(Service.class);
-        service.run();
-
-        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setChannelService(service);
-        // 初始化Web3j对象
-        Web3j web3j = Web3j.build(channelEthereumService, 1);
-
         //通过指定外部账户私钥使用指定的外部账户
         Credentials credentials = GenCredential.create(privateKey);
-        //账户地址
-        String address = credentials.getAddress();
 
         try {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
-            String name=charity.getName().send().getOutput();
+            String name=charity.getName().send();
             return name;
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
@@ -246,26 +233,15 @@ public class CharityApplication {
     @GetMapping("/getUserPhone")
     public String getUserPhone(@RequestParam(value = "privateKey", required=true) String privateKey
     ) throws Exception {
-        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
-        Service service = context.getBean(Service.class);
-        service.run();
-
-        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setChannelService(service);
-        // 初始化Web3j对象
-        Web3j web3j = Web3j.build(channelEthereumService, 1);
-
         //通过指定外部账户私钥使用指定的外部账户
         Credentials credentials = GenCredential.create(privateKey);
-        //账户地址
-        String address = credentials.getAddress();
 
         try {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
-            String phone=charity.getPhone().send().getOutput();
+            String phone=charity.getPhone().send();
             return phone;
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
@@ -277,17 +253,8 @@ public class CharityApplication {
     // privateKey: 私钥
     // 返回: 用户balance
     @GetMapping("/getUserBalance")
-    public String getUserInfo(@RequestParam(value = "privateKey", required=true) String privateKey
+    public BigInteger getUserInfo(@RequestParam(value = "privateKey", required=true) String privateKey
     ) throws Exception {
-        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
-        Service service = context.getBean(Service.class);
-        service.run();
-
-        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setChannelService(service);
-        // 初始化Web3j对象
-        Web3j web3j = Web3j.build(channelEthereumService, 1);
-
         //通过指定外部账户私钥使用指定的外部账户
         Credentials credentials = GenCredential.create(privateKey);
         //账户地址
@@ -298,7 +265,7 @@ public class CharityApplication {
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
-            String balance=charity.getBalance().send().getOutput();
+            BigInteger balance=charity.getBalance().send();
             return balance;
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
@@ -331,8 +298,8 @@ public class CharityApplication {
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
-            String ownItemsId=charity.getOwnItemsId().send().getOutput();
-            return ownItemsId;
+            List<BigInteger> ownItemsId=charity.getOwnItemsId().send();
+            return ownItemsId.toString();
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
             return null;
@@ -364,8 +331,8 @@ public class CharityApplication {
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
-            String partItemsId=charity.getpartItemsId().send().getOutput();
-            return partItemsId;
+            List<BigInteger> partItemsId=charity.getpartItemsId().send();
+            return partItemsId.toString();
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
             return null;
