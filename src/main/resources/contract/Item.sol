@@ -200,7 +200,7 @@ contract Item {
 
     返回值：0:操作成功   -1:操作失败
     */
-    function cancelItem(int item_id) public constant returns(int256) {
+    function cancelItem(int item_id) public returns(int256) {
      int256 ret_code = 0;
      Table table = openTable();
      
@@ -221,7 +221,7 @@ contract Item {
 
     返回值：0:操作成功   -1:操作失败
     */
-    function pushItem(int item_id) public constant returns(int256) {
+    function pushItem(int item_id) public returns(int256) {
      int256 ret_code = 0;
      Table table = openTable();
      Entries entries = table.select(item_id, table.newCondition());
