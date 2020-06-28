@@ -40,7 +40,7 @@ public class CharityApplication {
     // 此处是照搬asset app的部分
     private Web3j web3j;
 
-    private Credentials credentials;
+    private Credentials s_credentials;
 
     static Logger logger = LoggerFactory.getLogger(CharityApplication.class);
 
@@ -82,11 +82,11 @@ public class CharityApplication {
     }
 
     public Credentials getCredentials() {
-        return credentials;
+        return s_credentials;
     }
 
     public void setCredentials(Credentials credentials) {
-        this.credentials = credentials;
+        this.s_credentials = credentials;
     }
 
     public void initialize() throws Exception {
@@ -112,7 +112,7 @@ public class CharityApplication {
 
     public void deployAssetAndRecordAddr() {
         try {
-            Charity asset = Charity.deploy(web3j, credentials, new StaticGasProvider(gasPrice, gasLimit)).send();
+            Charity asset = Charity.deploy(web3j, s_credentials, new StaticGasProvider(gasPrice, gasLimit)).send();
             System.out.println(" deploy Asset success, contract address is " + asset.getContractAddress());
 
             recordAssetAddr(asset.getContractAddress());
@@ -131,7 +131,7 @@ public class CharityApplication {
             address = loadAssetAddr();
         } catch (Exception e1) {
             try {
-                Charity asset = Charity.deploy(web3j, credentials, new StaticGasProvider(gasPrice, gasLimit)).send();
+                Charity asset = Charity.deploy(web3j, s_credentials, new StaticGasProvider(gasPrice, gasLimit)).send();
                 address = asset.getContractAddress();
                 System.out.println(" deploy Charity success, contract address is " + address);
                 recordAssetAddr(address);
@@ -207,10 +207,76 @@ public class CharityApplication {
         }
     }
 
-    //返回用户信息
+    //返回用户name
     // privateKey: 私钥
-    // 返回: 用户信息（name,phone,balance,ownItemsId,ownItemsId）
-    @GetMapping("/getUserInfo")
+    // 返回: 用户信息name
+    @GetMapping("/getUserName")
+    public String getUserName(@RequestParam(value = "privateKey", required=true) String privateKey
+    ) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+            String name=charity.getName();
+            return name;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+    //返回用户phone
+    // privateKey: 私钥
+    // 返回: 用户phone
+    @GetMapping("/getUserPhone")
+    public String getUserPhone(@RequestParam(value = "privateKey", required=true) String privateKey
+    ) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+            String phone=charity.getPhone().send().getOutput();
+            return phone;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+    //返回用户balance
+    // privateKey: 私钥
+    // 返回: 用户balance
+    @GetMapping("/getUserBalance")
     public String getUserInfo(@RequestParam(value = "privateKey", required=true) String privateKey
     ) throws Exception {
         ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
@@ -232,15 +298,84 @@ public class CharityApplication {
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
-            return charity.getUserInfo().send().getOutput();
+            String balance=charity.getBalance().send().getOutput();
+            return balance;
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
             return null;
         }
-
     }
 
+    //返回用户ownItemsId
+    // privateKey: 私钥
+    // 返回: 用户ownItemsId
+    @GetMapping("/getUserOwnItemsId")
+    public String getUserOwnItemsId(@RequestParam(value = "privateKey", required=true) String privateKey
+    ) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+            String ownItemsId=charity.getOwnItemsId().send().getOutput();
+            return ownItemsId;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+    //返回用户PartItemsId
+    // privateKey: 私钥
+    // 返回: 用户PartItemsId
+    @GetMapping("/getUserPartItemsId")
+    public String getUserPartItemsId(@RequestParam(value = "privateKey", required=true) String privateKey
+    ) throws Exception {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+        Service service = context.getBean(Service.class);
+        service.run();
+
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        // 初始化Web3j对象
+        Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+            String partItemsId=charity.getpartItemsId().send().getOutput();
+            return partItemsId;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+
+
     // 发起项目
+<<<<<<< HEAD
     //    item_id: 项目ID int
     //    publisher_name : 发起人 string
     //    item_name  : 项目名称 string
@@ -277,6 +412,18 @@ public class CharityApplication {
             return null;
         }
 
+=======
+    // id: 账户ID
+    // name: 项目名
+    // string: 描述
+    // target: 目标金额
+    // 返回: 项目ID
+    @RequestMapping("/publish")
+    public BigInteger publish(@RequestParam(value = "id") BigInteger id,
+                              @RequestParam(value = "name", required = true) String name,
+                              @RequestParam(value = "describe", defaultValue = "No description.") String describe,
+                              @RequestParam(value = "target", required = true) BigInteger target) {
+>>>>>>> 692bd8739fdd695f355756e707411dfd03c0064c
         return new BigInteger("0");
     }
 
@@ -293,11 +440,13 @@ public class CharityApplication {
     // amount: 捐赠数额
     // 返回：JSON串，包含是否成功/交易ID/失败原因
     @RequestMapping("/donate")
-    public String donate(@RequestParam(value = "id", required = true) BigInteger id,
+    public String donate(@RequestParam(value = "privateKey", required=true) String privateKey,
+            @RequestParam(value = "id", required = true) BigInteger id,
                          @RequestParam(value = "amount", required = true) BigInteger amount) {
         try {
-            String address = loadOrDeploy();
-            Charity charity = Charity.load(address, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            String contractAddress = loadOrDeploy();
+            Credentials credentials = GenCredential.create(privateKey);
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             String rid = charity.donate(amount, id).send().getOutput();
 
             return String.format("{succeed:%d, id:%s}", 1, rid);
@@ -308,29 +457,35 @@ public class CharityApplication {
     }
 
     private HashMap<BigInteger, BigInteger> waitForJudge;
+    private HashMap<BigInteger, String> judgeOwner;
     private HashMap<BigInteger, Boolean> judgeResult;
 
     // 反悔，撤销捐赠，发起仲裁。仲裁将发送给管理员（管理员的实现待讨论）
+    // privateKey：私钥
     // id: 捐赠交易的ID
     // 返回: 本次仲裁的编号，用于查询仲裁结果。
     @GetMapping("/repent")
-    public BigInteger repent(@RequestParam(value = "id", required = true) BigInteger id) {
+    public BigInteger repent(@RequestParam(value = "privateKey", required=true) String privateKey,
+                             @RequestParam(value = "id", required = true) BigInteger id) {
         final long time = System.currentTimeMillis();
         BigInteger code = new BigInteger("" + time);
         waitForJudge.put(code, id);
+        judgeOwner.put(code, privateKey);
         return code;
     }
 
     // 仅限管理员使用的功能，仲裁
     // id: 仲裁编号
     // agree: 是否同意撤销捐赠
-    @RequestMapping("/admin/judge")
+    @RequestMapping("/judge")
     public void judge(@RequestParam(value = "id", required = true) BigInteger id,
                       @RequestParam(value = "agree", defaultValue = "true") boolean agree) {
         BigInteger tran_id = waitForJudge.get(id);
+        String owner = judgeOwner.get(id);
         if (agree) {
             try {
                 String address = loadOrDeploy();
+                Credentials credentials = GenCredential.create(owner);
                 Charity charity = Charity.load(address, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
                 charity.undoDonate(id).send();
             } catch (Exception e) {
@@ -340,13 +495,14 @@ public class CharityApplication {
         }
         judgeResult.put(id, agree);
         waitForJudge.remove(id);
+        judgeOwner.remove(id);
     }
 
     // 查询仲裁结果
     // id: 仲裁编号
     // 返回: 仲裁结果，至少包含: 不存在，尚未仲裁，通过，拒绝。
-    @RequestMapping("/result/{id}")
-    public String infoJudge(@PathVariable(value = "id") BigInteger id) {
+    @RequestMapping("/result")
+    public String infoJudge(@RequestParam(value = "id") BigInteger id) {
         if (waitForJudge.containsKey(id)) {
             return new String("Judging.");
         } else if (judgeResult.containsKey(id)) {
