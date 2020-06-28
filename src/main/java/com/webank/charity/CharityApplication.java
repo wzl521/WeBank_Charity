@@ -185,14 +185,13 @@ public class CharityApplication {
         String publicKey = credentials.getEcKeyPair().getPublicKey().toString(16);
 
         try {
-            Charity asset = Charity.deploy(web3j, credentials, new StaticGasProvider(gasPrice, gasLimit)).send();
-            String contractAddress;
-            contractAddress = asset.getContractAddress();
-            System.out.println(" deploy Charity success, contract address is " + contractAddress);
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
-            asset.registerUser(name, phone, location, email);
+            charity.registerUser(name, phone, location, email);
         } catch (Exception e2) {
-            System.out.println(" deploy Charity contract failed, error message is  " + e2.getMessage());
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
         }
 
         //return new String("Successful.");
