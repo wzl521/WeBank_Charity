@@ -38,7 +38,7 @@ contract Item {
             -1 项目id已存在
             -2 其他错误
     */
-    function registerItem(string item_id, string publisher_name, string item_name, string beneficiary_name,
+    function registerItem(int item_id, string publisher_name, string item_name, string beneficiary_name,
      int target_amount, string description) public returns(int256){
          
         int256 ret_code = 0;
@@ -92,10 +92,10 @@ contract Item {
             status（不可修改）:项目状态
             
     返回值：
-            0  修改成功
+            1  修改成功
             其他值 修改失败
     */
-    function updateItem(string item_id, string publisher_name, string item_name, string beneficiary_name,
+    function updateItem(int item_id, string publisher_name, string item_name, string beneficiary_name,
      int target_amount, string description, int donation_amount,int num_of_donation, string status) public returns(int256){
          
         Table table = openTable();
@@ -131,7 +131,7 @@ contract Item {
             
             
     */
-    function getItem0(string item_id) public constant returns(int256, string, string, string, int) {
+    function getItem0(int item_id) public constant returns(int256, string, string, string, int) {
         // 打开表
         Table table = openTable();
         // 查询
@@ -169,7 +169,7 @@ contract Item {
             num_of_donation:捐款次数 
             status:项目状态
     */
-    function getItem1(string item_id) public constant returns(int256, string, int, int, string) {
+    function getItem1(int item_id) public constant returns(int256, string, int, int, string) {
         // 打开表
         Table table = openTable();
         // 查询
@@ -200,7 +200,7 @@ contract Item {
 
     返回值：0:操作成功   -1:操作失败
     */
-    function cancelItem(string item_id) public constant returns(int256) {
+    function cancelItem(int item_id) public constant returns(int256) {
      int256 ret_code = 0;
      Table table = openTable();
      
@@ -221,7 +221,7 @@ contract Item {
 
     返回值：0:操作成功   -1:操作失败
     */
-    function pushItem(string item_id) public constant returns(int256) {
+    function pushItem(int item_id) public constant returns(int256) {
      int256 ret_code = 0;
      Table table = openTable();
      Entries entries = table.select(item_id, table.newCondition());
