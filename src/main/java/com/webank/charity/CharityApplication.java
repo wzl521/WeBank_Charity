@@ -159,14 +159,11 @@ public class CharityApplication {
     // 开户接口
     // name: 自然人名字
     // phone: 电话
-    // location: 地址
-    // email: 邮箱
     // 返回: 私钥
     @GetMapping("/gen_account")
     public String genAccount(@RequestParam(value = "name", required = true) String name,
                              @RequestParam(value = "phone", required = true) String phone,
-                             @RequestParam(value = "location", required = true) String location,
-                             @RequestParam(value = "email", required = true) String email) {
+) {
         //创建普通账户
         EncryptType.encryptType = 0;
         Credentials credentials = GenCredential.create();
