@@ -2,6 +2,7 @@ package com.webank.charity;
 
 import com.alibaba.druid.sql.visitor.functions.Char;
 import org.fisco.bcos.channel.client.Service;
+import org.fisco.bcos.charity.contract.Item;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Keys;
@@ -9,6 +10,7 @@ import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.charity.contract.Charity;
+import org.fisco.bcos.charity.contract.Item;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.slf4j.Logger;
@@ -416,9 +418,27 @@ public class CharityApplication {
     // 下架项目
     // id: 项目ID
     // 返回: 错误信息
-    @RequestMapping("/withdraw")
-    public String withdraw(@RequestParam(value = "privateKey", required=true) String privateKey,
-                @RequestParam(value = "item_id", required = true) BigInteger item_id) {
+    @RequestMapping("/cancelItem")
+    public String cancelItem(@RequestParam(value = "privateKey", required=true) String privateKey,
+                             @RequestParam(value = "item_id", required = true) BigInteger item_id)
+            throws Exception{
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            Item item = Item.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+
+
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
         return new String("Successful");
     }
 
