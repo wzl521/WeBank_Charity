@@ -234,8 +234,8 @@ public class CharityApplication {
     // string: 描述
     // target: 目标金额
     // 返回: 项目ID
-    @RequestMapping("/publish/{id}")
-    public BigInteger publish(@PathVariable(value = "id") BigInteger id,
+    @RequestMapping("/publish")
+    public BigInteger publish(@RequestParam(value = "id") BigInteger id,
                               @RequestParam(value = "name", required = true) String name,
                               @RequestParam(value = "describe", defaultValue = "No description.") String describe,
                               @RequestParam(value = "target", required = true) BigInteger target) {
@@ -316,8 +316,8 @@ public class CharityApplication {
     // 查询仲裁结果
     // id: 仲裁编号
     // 返回: 仲裁结果，至少包含: 不存在，尚未仲裁，通过，拒绝。
-    @RequestMapping("/result/{id}")
-    public String infoJudge(@PathVariable(value = "id") BigInteger id) {
+    @RequestMapping("/result")
+    public String infoJudge(@RequestParam(value = "id") BigInteger id) {
         if (waitForJudge.containsKey(id)) {
             return new String("Judging.");
         } else if (judgeResult.containsKey(id)) {
