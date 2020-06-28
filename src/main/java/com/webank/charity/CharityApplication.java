@@ -162,7 +162,7 @@ public class CharityApplication {
     // 返回: 私钥
     @GetMapping("/gen_account")
     public String genAccount(@RequestParam(value = "name", required = true) String name,
-                             @RequestParam(value = "phone", required = true) String phone,
+                             @RequestParam(value = "phone", required = true) String phone
 ) {
         //创建普通账户
         EncryptType.encryptType = 0;
