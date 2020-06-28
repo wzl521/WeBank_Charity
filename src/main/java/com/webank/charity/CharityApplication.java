@@ -145,9 +145,15 @@ public class CharityApplication {
 
     // 测试用页面
     @GetMapping("/test")
-    public String test() throws Exception  {
-        BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();
-        return String.format("Block Number: %d!", blockNumber);
+    public String test(@RequestParam(value = "privateKey", required = true) String privateKey) throws Exception {
+        try {
+            String contractAddress = loadOrDeploy();
+            Credentials credentials = GenCredential.create(privateKey);
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            return new String("Successful");
+        } catch (Exception e) {
+            return new String("Failed");
+        }
     }
 
     // 开户接口
@@ -157,10 +163,10 @@ public class CharityApplication {
     // email: 邮箱
     // 返回: 私钥
     @GetMapping("/gen_account")
-    public String genAccount(@RequestParam(value = "name", required=true) String name,
-                           @RequestParam(value = "phone", required=true) String phone,
-                           @RequestParam(value = "location", required=true) String location,
-                           @RequestParam(value = "email", required=true) String email) {
+    public String genAccount(@RequestParam(value = "name", required = true) String name,
+                             @RequestParam(value = "phone", required = true) String phone,
+                             @RequestParam(value = "location", required = true) String location,
+                             @RequestParam(value = "email", required = true) String email) {
         //创建普通账户
         EncryptType.encryptType = 0;
         Credentials credentials = GenCredential.create();
@@ -189,18 +195,17 @@ public class CharityApplication {
     // privateKey: 私钥
     // 返回: 登陆信息
     @GetMapping("/login")
-    public String login(@RequestParam(value = "privateKey", required=true) String privateKey
-                             ) throws Exception {
+    public String login(@RequestParam(value = "privateKey", required = true) String privateKey
+    ) throws Exception {
         //通过指定外部账户私钥使用指定的外部账户
         Credentials credentials = GenCredential.create(privateKey);
         //账户地址
         String address = credentials.getAddress();
         //账户公钥
         String publicKey = credentials.getEcKeyPair().getPublicKey().toString(16);
-        if(credentials!=null) {
+        if (credentials != null) {
             return new String("Successful.");
-        }
-        else{
+        } else {
             return new String("Failed.");
         }
     }
@@ -212,10 +217,10 @@ public class CharityApplication {
     // target: 目标金额
     // 返回: 项目ID
     @RequestMapping("/publish/{id}")
-    public BigInteger publish(@PathVariable(value="id") BigInteger id,
-                              @RequestParam(value="name", required=true) String name,
-                              @RequestParam(value="describe", defaultValue="No description.") String describe,
-                              @RequestParam(value="target", required=true) BigInteger target) {
+    public BigInteger publish(@PathVariable(value = "id") BigInteger id,
+                              @RequestParam(value = "name", required = true) String name,
+                              @RequestParam(value = "describe", defaultValue = "No description.") String describe,
+                              @RequestParam(value = "target", required = true) BigInteger target) {
         return new BigInteger("0");
     }
 
@@ -223,7 +228,7 @@ public class CharityApplication {
     // id: 项目ID
     // 返回: 错误信息
     @GetMapping("/withdraw")
-    public String withdraw(@RequestParam(value="id", required=true) BigInteger id) {
+    public String withdraw(@RequestParam(value = "id", required = true) BigInteger id) {
         return new String("Successful");
     }
 
@@ -232,8 +237,8 @@ public class CharityApplication {
     // amount: 捐赠数额
     // 返回：JSON串，包含是否成功/交易ID/失败原因
     @RequestMapping("/donate")
-    public String donate(@RequestParam(value="id", required=true) BigInteger id,
-                         @RequestParam(value="amount", required=true) BigInteger amount) {
+    public String donate(@RequestParam(value = "id", required = true) BigInteger id,
+                         @RequestParam(value = "amount", required = true) BigInteger amount) {
         try {
             String address = loadOrDeploy();
             Charity charity = Charity.load(address, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
@@ -248,11 +253,12 @@ public class CharityApplication {
 
     private HashMap<BigInteger, BigInteger> waitForJudge;
     private HashMap<BigInteger, Boolean> judgeResult;
+
     // 反悔，撤销捐赠，发起仲裁。仲裁将发送给管理员（管理员的实现待讨论）
     // id: 捐赠交易的ID
     // 返回: 本次仲裁的编号，用于查询仲裁结果。
     @GetMapping("/repent")
-    public BigInteger repent(@RequestParam(value="id", required=true) BigInteger id) {
+    public BigInteger repent(@RequestParam(value = "id", required = true) BigInteger id) {
         final long time = System.currentTimeMillis();
         BigInteger code = new BigInteger("" + time);
         waitForJudge.put(code, id);
@@ -263,8 +269,8 @@ public class CharityApplication {
     // id: 仲裁编号
     // agree: 是否同意撤销捐赠
     @RequestMapping("/admin/judge")
-    public void judge(@RequestParam(value="id", required=true) BigInteger id,
-                         @RequestParam(value="agree", defaultValue="true") boolean agree) {
+    public void judge(@RequestParam(value = "id", required = true) BigInteger id,
+                      @RequestParam(value = "agree", defaultValue = "true") boolean agree) {
         BigInteger tran_id = waitForJudge.get(id);
         if (agree) {
             try {
@@ -284,7 +290,7 @@ public class CharityApplication {
     // id: 仲裁编号
     // 返回: 仲裁结果，至少包含: 不存在，尚未仲裁，通过，拒绝。
     @RequestMapping("/result/{id}")
-    public String infoJudge(@PathVariable(value="id") BigInteger id) {
+    public String infoJudge(@PathVariable(value = "id") BigInteger id) {
         if (waitForJudge.containsKey(id)) {
             return new String("Judging.");
         } else if (judgeResult.containsKey(id)) {
