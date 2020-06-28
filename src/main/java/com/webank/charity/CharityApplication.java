@@ -292,7 +292,7 @@ public class CharityApplication {
     // 仅限管理员使用的功能，仲裁
     // id: 仲裁编号
     // agree: 是否同意撤销捐赠
-    @RequestMapping("/admin/judge")
+    @RequestMapping("/judge")
     public void judge(@RequestParam(value = "id", required = true) BigInteger id,
                       @RequestParam(value = "agree", defaultValue = "true") boolean agree) {
         BigInteger tran_id = waitForJudge.get(id);
