@@ -377,7 +377,7 @@ public class CharityApplication {
             BigInteger ret_code =responses.get(0).ret_code;
             BigInteger item_id = responses.get(0).id;
 
-            res = ret_code.toString() + "," +item_id.toString();
+            String res = ret_code.toString() + "," +item_id.toString();
             return res;
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
@@ -407,7 +407,7 @@ public class CharityApplication {
 
             TransactionReceipt trans= charity.cancelItem(item_id).send();
             List<Charity.CancelItemEventEventResponse> responses = charity.getCancelItemEventEvents(trans);
-            BigInteger ret_code =responses.get(0).count;
+            BigInteger ret_code =responses.get(0).ret_code;
             return ret_code.toString();
 
         } catch (Exception e2) {
