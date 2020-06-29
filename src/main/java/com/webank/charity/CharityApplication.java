@@ -529,6 +529,87 @@ public class CharityApplication {
         }
     }
 
+    // 根据item_id得到donation_amount
+// privateKey: 私钥
+// item_id
+// 返回: 根据item_id得到donation_amount
+    @GetMapping("/get_item_donation_amount")
+    public BigInteger get_item_donation_amount(@RequestParam(value = "privateKey", required=true) String privateKey,
+                                             @RequestParam(value = "item_id", required=true) BigInteger item_id
+    ) throws Exception {
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+
+            BigInteger donation_amount = charity.getItem1(item_id).send().getValue3();
+            return donation_amount;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+    // 根据item_id得到num_of_donation
+// privateKey: 私钥
+// item_id
+// 返回: 根据item_id得到num_of_donation
+    @GetMapping("/get_item_num_of_donation")
+    public BigInteger get_item_num_of_donation(@RequestParam(value = "privateKey", required=true) String privateKey,
+                                               @RequestParam(value = "item_id", required=true) BigInteger item_id
+    ) throws Exception {
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+
+            BigInteger num_of_donation = charity.getItem1(item_id).send().getValue4();
+            return num_of_donation;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+    // 根据item_id得到status
+// privateKey: 私钥
+// item_id
+// 返回: 根据item_id得到status
+    @GetMapping("/get_item_status")
+    public String get_item_status(@RequestParam(value = "privateKey", required=true) String privateKey,
+                                       @RequestParam(value = "item_id", required=true) BigInteger item_id
+    ) throws Exception {
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+
+            String status = charity.getItem1(item_id).send().getValue5();
+            return status;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
     // 得到所有项目
 // privateKey: 私钥
 // 返回: allItemsId
@@ -591,6 +672,37 @@ public class CharityApplication {
             return null;
         }
     }
+
+//    // 重新上架项目
+//    // id: 项目ID
+//    // 返回: 错误信息
+//    @RequestMapping("/pushItem")
+//    public String pubshItem(@RequestParam(value = "privateKey", required=true) String privateKey,
+//                             @RequestParam(value = "item_id", required = true) BigInteger item_id)
+//            throws Exception{
+//        //通过指定外部账户私钥使用指定的外部账户
+//        Credentials credentials = GenCredential.create(privateKey);
+//        //账户地址
+//        String address = credentials.getAddress();
+//
+//        try {
+//            String contractAddress = loadOrDeploy();
+//            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+//            Item item = Item.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+//            System.out.println(" load Charity success, contract address is " + contractAddress);
+//            recordAssetAddr(contractAddress);
+//
+//            TransactionReceipt trans= charity.pushItem(item_id).send();
+//            List<Charity.CancelItemEventEventResponse> responses = charity.getPushItemEventEvents(trans);
+//            BigInteger ret_code =responses.get(0).ret_code;
+//            return ret_code.toString();
+//
+//        } catch (Exception e2) {
+//            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+//            return null;
+//        }
+//    }
+
 
     // 发起捐赠
     // id: 项目ID
