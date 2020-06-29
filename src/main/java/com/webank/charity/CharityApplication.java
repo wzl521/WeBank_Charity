@@ -10,7 +10,7 @@ import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.charity.contract.Charity;
-import org.fisco.bcos.charity.contract.Item;
+
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.slf4j.Logger;
@@ -355,9 +355,7 @@ public class CharityApplication {
     //            -1 项目id已存在
     //            -2 其他错误
     @RequestMapping("/publish")
-    public BigInteger publish(@RequestParam(value = "privateKey", required=true) String privateKey,
-                              @RequestParam(value = "item_id", required = true) BigInteger item_id,
-                              @RequestParam(value = "publisher_name", required = true) String publisher_name,
+    public String publish(@RequestParam(value = "privateKey", required=true) String privateKey,
                               @RequestParam(value = "item_name", required = true) String item_name,
                               @RequestParam(value = "beneficiary_name", required = true) String beneficiary_name,
                               @RequestParam(value = "target_amount", required = true) BigInteger target,
@@ -374,7 +372,13 @@ public class CharityApplication {
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
 
+            TransactionReceipt trans= charity.registerItem(item_name, beneficiary_name, target,description).send();
+            List<Charity.RegisterItemEventEventResponse> responses = charity.getRegisterItemEventEvents(trans);
+            BigInteger ret_code =responses.get(0).ret_code;
+            BigInteger item_id = responses.get(0).id;
 
+            res = ret_code.toString() + "," +item_id.toString();
+            return res;
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
             return null;
@@ -401,12 +405,15 @@ public class CharityApplication {
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
 
+            TransactionReceipt trans= charity.cancelItem(item_id).send();
+            List<Charity.RegisterItemEventEventResponse> responses = charity.getCancelItemEventEvents(trans);
+            BigInteger ret_code =responses.get(0).count;
+            return ret_code.toString();
 
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
             return null;
         }
-        return new String("Successful");
     }
 
     // 发起捐赠
