@@ -44,7 +44,7 @@ contract Charity {
     event registerUserEvent(address sender);
     event registerItemEvent(int256 ret_code, uint256 id);
     event updateItemEvent();
-    event cancelItemEvent();
+    event cancelItemEvent(int256 ret_code);
     event pushItemEvent(int256 ret_code);
     event donateEvent(uint256 id);
     event undoDonateEvent();
@@ -136,7 +136,7 @@ contract Charity {
         
         
         if (0 == uint256(entries.size())) {
-            emit getItem0Event(-1, publisher_name, item_name,  beneficiary_name, target_amount);
+            //emit getItem0Event(-1, publisher_name, item_name,  beneficiary_name, target_amount);
             return (-1, publisher_name, item_name,  beneficiary_name, target_amount);
         } else {
             Entry entry = entries.get(0);
@@ -146,7 +146,7 @@ contract Charity {
             beneficiary_name = entry.getString("beneficiary_name");
             target_amount = uint256(entry.getUInt("target_amount"));
 
-            emit getItem0Event(0, publisher_name, item_name,  beneficiary_name, target_amount);
+            //emit getItem0Event(0, publisher_name, item_name,  beneficiary_name, target_amount);
             return (0, publisher_name, item_name,  beneficiary_name, target_amount);
         }
     }
@@ -163,7 +163,7 @@ contract Charity {
         string memory status = "null";
         
         if (0 == uint256(entries.size())) {
-           emit getItem1Event(-1, description, donation_amount, num_of_donation, status);
+           //emit getItem1Event(-1, description, donation_amount, num_of_donation, status);
            return (-1, description, donation_amount, num_of_donation, status);
         } else {
             Entry entry = entries.get(0);
@@ -173,7 +173,7 @@ contract Charity {
             num_of_donation = uint256(entry.getUInt("num_of_donation"));
             status = entry.getString("status");
 
-            emit getItem1Event(0, description, donation_amount, num_of_donation, status);
+            //emit getItem1Event(0, description, donation_amount, num_of_donation, status);
             return (0, description, donation_amount, num_of_donation, status);
         }
     }
