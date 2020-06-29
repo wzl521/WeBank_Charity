@@ -23,9 +23,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -66,6 +64,7 @@ public class CharityApplication {
 
         String contractAddress = prop.getProperty("address");
         if (contractAddress == null || contractAddress.trim().equals("")) {
+            logger.info(" load Asset contract address failed, please deploy it first. ");
             throw new Exception(" load Asset contract address failed, please deploy it first. ");
         }
         logger.info(" load Asset address from contract.properties, address is {}", contractAddress);
@@ -107,19 +106,6 @@ public class CharityApplication {
         setWeb3j(web3j);
 
         logger.debug(" web3j is " + web3j + " ,credentials is " + credentials);
-    }
-
-    public void deployAssetAndRecordAddr() {
-        try {
-            Charity asset = Charity.deploy(web3j, s_credentials, new StaticGasProvider(gasPrice, gasLimit)).send();
-            System.out.println(" deploy Asset success, contract address is " + asset.getContractAddress());
-
-            recordAssetAddr(asset.getContractAddress());
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            // e.printStackTrace();
-            System.out.println(" deploy Asset contract failed, error message is  " + e.getMessage());
-        }
     }
 
     // 检查是否部署合约并返回合约地址
@@ -220,7 +206,6 @@ public class CharityApplication {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
-            recordAssetAddr(contractAddress);
             String name=charity.getName().send();
             return name;
         } catch (Exception e2) {
@@ -242,7 +227,6 @@ public class CharityApplication {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
-            recordAssetAddr(contractAddress);
             String phone=charity.getPhone().send();
             return phone;
         } catch (Exception e2) {
@@ -266,7 +250,6 @@ public class CharityApplication {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
-            recordAssetAddr(contractAddress);
             BigInteger balance=charity.getBalance().send();
             return balance;
         } catch (Exception e2) {
@@ -299,7 +282,6 @@ public class CharityApplication {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
-            recordAssetAddr(contractAddress);
             List<BigInteger> ownItemsId=charity.getOwnItemsId().send();
             return ownItemsId.toString();
         } catch (Exception e2) {
@@ -332,7 +314,6 @@ public class CharityApplication {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
-            recordAssetAddr(contractAddress);
             List<BigInteger> partItemsId=charity.getpartItemsId().send();
             return partItemsId.toString();
         } catch (Exception e2) {
@@ -371,10 +352,9 @@ public class CharityApplication {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
-            recordAssetAddr(contractAddress);
-
             TransactionReceipt trans= charity.registerItem(item_name, beneficiary_name, target,description).send();
             List<Charity.RegisterItemEventEventResponse> responses = charity.getRegisterItemEventEvents(trans);
+            System.out.println(" size is  " + responses.size());
             BigInteger ret_code =responses.get(0).ret_code;
             BigInteger item_id = responses.get(0).id;
 
@@ -410,7 +390,6 @@ public String getAllItemsId(@RequestParam(value = "privateKey", required=true) S
         String contractAddress = loadOrDeploy();
         Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
         System.out.println(" load Charity success, contract address is " + contractAddress);
-        recordAssetAddr(contractAddress);
         List<BigInteger> allItemsId=charity.getAllItemsId().send();
         return allItemsId.toString();
     } catch (Exception e2) {
@@ -436,7 +415,6 @@ public String getAllItemsId(@RequestParam(value = "privateKey", required=true) S
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             Item item = Item.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
-            recordAssetAddr(contractAddress);
 
             TransactionReceipt trans= charity.cancelItem(item_id).send();
             List<Charity.CancelItemEventEventResponse> responses = charity.getCancelItemEventEvents(trans);
@@ -461,9 +439,11 @@ public String getAllItemsId(@RequestParam(value = "privateKey", required=true) S
             String contractAddress = loadOrDeploy();
             Credentials credentials = GenCredential.create(privateKey);
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
-            String rid = charity.donate(amount, id).send().getOutput();
+            TransactionReceipt trans = charity.donate(amount, id).send();
+            List<Charity.DonateEventEventResponse> responses = charity.getDonateEventEvents(trans);
+            BigInteger rid = responses.get(0).id;
 
-            return String.format("{succeed:%d, id:%s}", 1, rid);
+            return String.format("{succeed:%d, id:%d}", 1, rid);
         } catch (Exception e) {
             logger.error("Donate failed! Message: {}.", e.getMessage());
             return String.format("{succeed:%d, error:\"%s\"}", 0, e.getMessage());
