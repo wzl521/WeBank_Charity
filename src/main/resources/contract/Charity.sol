@@ -22,6 +22,7 @@ contract Charity {
     mapping(address => UserEntity) account;
     mapping(uint256 => Record) records;
     uint256 randNonce;
+    uint256[] allItemsId;
 
     constructor() {
         randNonce = 0;
@@ -91,6 +92,7 @@ contract Charity {
                 // 成功
                 ret_code = 0;
                 account[msg.sender].ownItemsId.push(item_id);
+                allItemsId.push(item_id);
             } else {
                 // 失败? 无权限或者其他错误
                 ret_code = -2;
@@ -101,7 +103,9 @@ contract Charity {
         }
         emit registerItemEvent(ret_code, item_id);
     }
-
+    function getAllItemsId() public view returns(uint[]){
+            return allItemsId;
+        }
     function updateItem(uint256 item_id, string item_name, string beneficiary_name,
      uint target_amount, string description, uint256 donation_amount, uint256 num_of_donation) public {
          
@@ -121,6 +125,7 @@ contract Charity {
         table.update(uint2str(item_id), entry, condition);
         emit updateItemEvent();
     }
+
 
     function getItem0(uint256 item_id) public view returns(int256, string, string, string, uint256) {
         // 打开表
