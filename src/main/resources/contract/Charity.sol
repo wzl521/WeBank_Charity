@@ -47,8 +47,10 @@ contract Charity {
     event updateItemEvent();
     event cancelItemEvent(int256 ret_code);
     event pushItemEvent(int256 ret_code);
+    event pushItemEvent(int256 ret_code);
     event donateEvent(uint256 id);
     event undoDonateEvent();
+
 
     //用户注册
     function registerUser(
@@ -205,7 +207,6 @@ contract Charity {
 
     function cancelItem(uint256 item_id) public{
         Table table = openTable();
-
         Entry entry = table.newEntry();
         entry.set("status", "cancelled");
 
@@ -216,6 +217,17 @@ contract Charity {
 
         emit cancelItemEvent(count);
     }
+
+    function pushItem(uint256 item_id) public view {
+        Table table = openTable();
+        Entry entry = table.newEntry();
+        entry.set("status", "available");
+
+        Condition condition = table.newCondition();
+        condition.EQ("item_id", uint2str(item_id));
+        int count = table.update(uint2str(item_id), entry, condition);
+        emit cancelItemEvent(count);
+        }
 
    //设置用户信息
     function setName(string _name) public{
@@ -328,18 +340,6 @@ contract Charity {
 
         delete records[_rid];
         emit undoDonateEvent();
-    }
-
-    function pushItem(uint256 item_id) public view {
-        Table table = openTable();
-        Entries entries = table.select(uint2str(item_id), table.newCondition());
-        if(0 == uint256(entries.size())){
-            emit pushItemEvent(-1);
-        }else{
-            Entry entry = entries.get(0);
-            entry.set("status", "available");
-            emit pushItemEvent(0);
-        }
     }
 
     function uint2str(uint256 i) internal pure returns (string){
