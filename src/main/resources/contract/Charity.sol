@@ -61,6 +61,10 @@ contract Charity {
         account[msg.sender].balance = 1000;
         emit registerUserEvent(msg.sender);
     }
+//返回地址
+    function getMsgSender() view returns(address) {
+        return msg.sender;
+    }
 
     function registerItem(string item_name, string beneficiary_name,
      int target_amount, string description) public {
