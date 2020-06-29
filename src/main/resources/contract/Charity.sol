@@ -22,6 +22,7 @@ contract Charity {
     mapping(address => UserEntity) account;
     mapping(uint256 => Record) records;
     uint256 randNonce;
+    uint256[] allItemsId;
 
     constructor() {
         randNonce = 0;
@@ -44,7 +45,7 @@ contract Charity {
     event registerUserEvent(address sender);
     event registerItemEvent(int256 ret_code, uint256 id);
     event updateItemEvent();
-    event cancelItemEvent();
+    event cancelItemEvent(int256 ret_code);
     event pushItemEvent(int256 ret_code);
     event donateEvent(uint256 id);
     event undoDonateEvent();
@@ -63,7 +64,7 @@ contract Charity {
 
     function registerItem(string item_name, string beneficiary_name,
      int target_amount, string description) public {
-         
+
         int256 ret_code = 0;
         Table table = openTable();
         uint256 item_id = uint256(keccak256(now, msg.sender, randNonce));
@@ -77,7 +78,7 @@ contract Charity {
             
             entry.set("item_id", uint2str(item_id));
             entry.set("item_name", item_name);
-            entry.set("publisher_address", msg.sender);
+            //entry.set("publisher_address", msg.sender);
             entry.set("publisher_name", account[msg.sender].name);
             entry.set("beneficiary_name", beneficiary_name);
             entry.set("target_amount", target_amount);
@@ -91,6 +92,7 @@ contract Charity {
                 // 成功
                 ret_code = 0;
                 account[msg.sender].ownItemsId.push(item_id);
+                allItemsId.push(item_id);
             } else {
                 // 失败? 无权限或者其他错误
                 ret_code = -2;
@@ -99,10 +101,11 @@ contract Charity {
             // 项目已存在
             ret_code = -1;
         }
-       
         emit registerItemEvent(ret_code, item_id);
     }
-
+    function getAllItemsId() public view returns(uint[]){
+            return allItemsId;
+        }
     function updateItem(uint256 item_id, string item_name, string beneficiary_name,
      uint target_amount, string description, uint256 donation_amount, uint256 num_of_donation) public {
          
@@ -123,6 +126,7 @@ contract Charity {
         emit updateItemEvent();
     }
 
+
     function getItem0(uint256 item_id) public view returns(int256, string, string, string, uint256) {
         // 打开表
         Table table = openTable();
@@ -136,6 +140,7 @@ contract Charity {
         
         
         if (0 == uint256(entries.size())) {
+            //emit getItem0Event(-1, publisher_name, item_name,  beneficiary_name, target_amount);
             return (-1, publisher_name, item_name,  beneficiary_name, target_amount);
         } else {
             Entry entry = entries.get(0);
@@ -144,7 +149,8 @@ contract Charity {
             item_name = entry.getString("item_name");
             beneficiary_name = entry.getString("beneficiary_name");
             target_amount = uint256(entry.getUInt("target_amount"));
-           
+
+            //emit getItem0Event(0, publisher_name, item_name,  beneficiary_name, target_amount);
             return (0, publisher_name, item_name,  beneficiary_name, target_amount);
         }
     }
@@ -161,6 +167,7 @@ contract Charity {
         string memory status = "null";
         
         if (0 == uint256(entries.size())) {
+           //emit getItem1Event(-1, description, donation_amount, num_of_donation, status);
            return (-1, description, donation_amount, num_of_donation, status);
         } else {
             Entry entry = entries.get(0);
@@ -169,6 +176,8 @@ contract Charity {
             donation_amount = uint256(entry.getUInt("donation_amount"));
             num_of_donation = uint256(entry.getUInt("num_of_donation"));
             status = entry.getString("status");
+
+            //emit getItem1Event(0, description, donation_amount, num_of_donation, status);
             return (0, description, donation_amount, num_of_donation, status);
         }
     }
@@ -190,7 +199,7 @@ contract Charity {
         }
     }
 
-    function cancelItem(uint256 item_id) public view {
+    function cancelItem(uint256 item_id) public{
         Table table = openTable();
         
         Entry entry = table.newEntry();
@@ -200,6 +209,8 @@ contract Charity {
         condition.EQ("item_id", uint2str(item_id));
             
         int count = table.update(uint2str(item_id), entry, condition);
+
+        emit cancelItemEvent(count);
     }
 
    //设置用户信息

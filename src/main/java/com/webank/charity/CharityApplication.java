@@ -10,7 +10,7 @@ import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.charity.contract.Charity;
-import org.fisco.bcos.charity.contract.Item;
+
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.slf4j.Logger;
@@ -355,9 +355,7 @@ public class CharityApplication {
     //            -1 项目id已存在
     //            -2 其他错误
     @RequestMapping("/publish")
-    public BigInteger publish(@RequestParam(value = "privateKey", required=true) String privateKey,
-                              @RequestParam(value = "item_id", required = true) BigInteger item_id,
-                              @RequestParam(value = "publisher_name", required = true) String publisher_name,
+    public String publish(@RequestParam(value = "privateKey", required=true) String privateKey,
                               @RequestParam(value = "item_name", required = true) String item_name,
                               @RequestParam(value = "beneficiary_name", required = true) String beneficiary_name,
                               @RequestParam(value = "target_amount", required = true) BigInteger target,
@@ -367,20 +365,59 @@ public class CharityApplication {
         Credentials credentials = GenCredential.create(privateKey);
         //账户地址
         String address = credentials.getAddress();
-
+        //result
+        String res="null";
         try {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
 
+            TransactionReceipt trans= charity.registerItem(item_name, beneficiary_name, target,description).send();
+            List<Charity.RegisterItemEventEventResponse> responses = charity.getRegisterItemEventEvents(trans);
+            BigInteger ret_code =responses.get(0).ret_code;
+            BigInteger item_id = responses.get(0).id;
 
+            //res = ret_code.toString() + "," +item_id.toString();
+            return item_id.toString();
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
-            return null;
         }
+        return res;
     }
 
+// 得到所有项目
+// privateKey: 私钥
+// 返回: allItemsId
+@GetMapping("/getAllItemsId")
+public String getAllItemsId(@RequestParam(value = "privateKey", required=true) String privateKey
+) throws Exception {
+    ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+    Service service = context.getBean(Service.class);
+    service.run();
+
+    ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+    channelEthereumService.setChannelService(service);
+    // 初始化Web3j对象
+    Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+    //通过指定外部账户私钥使用指定的外部账户
+    Credentials credentials = GenCredential.create(privateKey);
+    //账户地址
+    String address = credentials.getAddress();
+
+    try {
+        String contractAddress = loadOrDeploy();
+        Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+        System.out.println(" load Charity success, contract address is " + contractAddress);
+        recordAssetAddr(contractAddress);
+        List<BigInteger> allItemsId=charity.getAllItemsId().send();
+        return allItemsId.toString();
+    } catch (Exception e2) {
+        System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+        return null;
+    }
+}
 
     // 下架项目
     // id: 项目ID
@@ -401,12 +438,15 @@ public class CharityApplication {
             System.out.println(" load Charity success, contract address is " + contractAddress);
             recordAssetAddr(contractAddress);
 
+            TransactionReceipt trans= charity.cancelItem(item_id).send();
+            List<Charity.CancelItemEventEventResponse> responses = charity.getCancelItemEventEvents(trans);
+            BigInteger ret_code =responses.get(0).ret_code;
+            return ret_code.toString();
 
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
             return null;
         }
-        return new String("Successful");
     }
 
     // 发起捐赠
