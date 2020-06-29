@@ -406,7 +406,7 @@ public class CharityApplication {
             recordAssetAddr(contractAddress);
 
             TransactionReceipt trans= charity.cancelItem(item_id).send();
-            List<Charity.RegisterItemEventEventResponse> responses = charity.getCancelItemEventEvents(trans);
+            List<Charity.CancelItemEventEventResponse> responses = charity.getCancelItemEventEvents(trans);
             BigInteger ret_code =responses.get(0).count;
             return ret_code.toString();
 
