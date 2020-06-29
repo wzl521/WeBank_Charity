@@ -32,7 +32,7 @@ contract Charity {
         TableFactory tf = TableFactory(0x1001); 
         // 项目信息表, key : item_id
         tf.createTable("t_item", "item_id", 
-        "item_name, publisher_name,beneficiary_name,donation_amount, target_amount, num_of_donation,description, status");
+        "item_name, publisher_name,publisher_address, beneficiary_name,donation_amount, target_amount, num_of_donation,description, status");
     }
 
     function openTable() private returns(Table) {
@@ -77,7 +77,7 @@ contract Charity {
             
             entry.set("item_id", uint2str(item_id));
             entry.set("item_name", item_name);
-            //entry.set("publisher_address", msg.sender);
+            entry.set("publisher_address", msg.sender);
             entry.set("publisher_name", account[msg.sender].name);
             entry.set("beneficiary_name", beneficiary_name);
             entry.set("target_amount", target_amount);
