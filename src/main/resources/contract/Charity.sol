@@ -42,15 +42,14 @@ contract Charity {
         return table;
     }
 
-    event registerUserEvent(address sender);
+	event registerUserEvent(address sender);
     event registerItemEvent(int256 ret_code, uint256 id);
     event updateItemEvent();
     event cancelItemEvent(int256 ret_code);
     event pushItemEvent(int256 ret_code);
-    event pushItemEvent(int256 ret_code);
-    event donateEvent(uint256 id);
+    event donateEvent(uint256 id, address from, address to);
     event undoDonateEvent();
-
+	
 
     //用户注册
     function registerUser(
@@ -84,7 +83,7 @@ contract Charity {
 
             entry.set("item_id", uint2str(item_id));
             entry.set("item_name", item_name);
-            //entry.set("publisher_address", msg.sender);
+            entry.set("publisher_address", msg.sender);
             entry.set("publisher_name", account[msg.sender].name);
             entry.set("beneficiary_name", beneficiary_name);
             entry.set("target_amount", target_amount);
@@ -200,7 +199,7 @@ contract Charity {
         } else {
             Entry entry = entries.get(0);
 
-            addr = entry.getAddress("publisher_address");
+            addr = entry.getAddress("beneficiary_name");
             return (0, addr);
         }
     }
@@ -282,7 +281,6 @@ contract Charity {
      //捐款
 
     function donate(uint256 _money, uint256 _id) public {
-        address donator;
         address _to;
         int256 ret;
         uint256 target_amount;
@@ -300,19 +298,18 @@ contract Charity {
         (ret, publisher_name, item_name, beneficiary_name, target_amount) = getItem0(_id);
         (ret, description, donation_amount, num_of_donation, status) = getItem1(_id);
 
-        if (_money > 0 && _money < account[donator].balance) {
-            account[donator].balance -= _money;
+        if (_money > 0 && _money < account[msg.sender].balance) {
+            account[msg.sender].balance -= _money;
             account[_to].balance += _money;
-            account[donator].partItemsId.push(_id);
+            account[msg.sender].partItemsId.push(_id);
             donation_amount += _money;
             num_of_donation += 1;
             updateItem(_id, item_name, beneficiary_name, target_amount, description, donation_amount, num_of_donation);
             uint256 _rid = uint256(keccak256(now, msg.sender, randNonce));
             randNonce++;
-            records[_rid] = Record(donator, _to, _rid, _money, _id);
-            emit donateEvent(_rid);
+            records[_rid] = Record(msg.sender, _to, _rid, _money, _id);
+            emit donateEvent(_rid, msg.sender, _to);
         }
-
     }
 
     function undoDonate(uint256 _rid) public {
