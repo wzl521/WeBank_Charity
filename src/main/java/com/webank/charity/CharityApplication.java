@@ -365,7 +365,8 @@ public class CharityApplication {
         Credentials credentials = GenCredential.create(privateKey);
         //账户地址
         String address = credentials.getAddress();
-
+        //result
+        String res="null";
         try {
             String contractAddress = loadOrDeploy();
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
@@ -377,12 +378,12 @@ public class CharityApplication {
             BigInteger ret_code =responses.get(0).ret_code;
             BigInteger item_id = responses.get(0).id;
 
-            String res = ret_code.toString() + "," +item_id.toString();
-            return res;
+            //res = ret_code.toString() + "," +item_id.toString();
+            return item_id.toString();
         } catch (Exception e2) {
             System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
-            return null;
         }
+        return res;
     }
 
 
