@@ -33,7 +33,7 @@ contract Charity {
         TableFactory tf = TableFactory(0x1001); 
         // 项目信息表, key : item_id
         tf.createTable("t_item", "item_id", 
-        "item_name, publisher_name, beneficiary_name,donation_amount, target_amount, num_of_donation,description, status");
+        "item_name, publisher_address, publisher_name, beneficiary_name,donation_amount, target_amount, num_of_donation,description, status");
     }
 
     function openTable() private returns(Table) {
