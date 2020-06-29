@@ -62,9 +62,8 @@ contract Charity {
     }
 
     function registerItem(string item_name, string beneficiary_name,
-     int target_amount, string description) public view
-     returns(int256, int256) {
-         
+     int target_amount, string description) public {
+
         int256 ret_code = 0;
         Table table = openTable();
         uint256 item_id = uint256(keccak256(now, msg.sender, randNonce));
@@ -102,7 +101,6 @@ contract Charity {
         }
        
         emit registerItemEvent(ret_code, item_id);
-        return (ret_code, item_id);
     }
 
     function updateItem(uint256 item_id, string item_name, string beneficiary_name,
@@ -197,7 +195,7 @@ contract Charity {
         }
     }
 
-    function cancelItem(uint256 item_id) public view returns(int) {
+    function cancelItem(uint256 item_id) public{
         Table table = openTable();
         
         Entry entry = table.newEntry();
@@ -209,7 +207,6 @@ contract Charity {
         int count = table.update(uint2str(item_id), entry, condition);
 
         emit cancelItemEvent(count);
-        return count;
     }
 
    //设置用户信息
