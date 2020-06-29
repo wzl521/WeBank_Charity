@@ -386,6 +386,38 @@ public class CharityApplication {
         return res;
     }
 
+// 得到所有项目
+// privateKey: 私钥
+// 返回: allItemsId
+@GetMapping("/getAllItemsId")
+public String getAllItemsId(@RequestParam(value = "privateKey", required=true) String privateKey
+) throws Exception {
+    ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+    Service service = context.getBean(Service.class);
+    service.run();
+
+    ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+    channelEthereumService.setChannelService(service);
+    // 初始化Web3j对象
+    Web3j web3j = Web3j.build(channelEthereumService, 1);
+
+    //通过指定外部账户私钥使用指定的外部账户
+    Credentials credentials = GenCredential.create(privateKey);
+    //账户地址
+    String address = credentials.getAddress();
+
+    try {
+        String contractAddress = loadOrDeploy();
+        Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+        System.out.println(" load Charity success, contract address is " + contractAddress);
+        recordAssetAddr(contractAddress);
+        List<BigInteger> allItemsId=charity.getAllItemsId().send();
+        return allItemsId.toString();
+    } catch (Exception e2) {
+        System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+        return null;
+    }
+}
 
     // 下架项目
     // id: 项目ID
