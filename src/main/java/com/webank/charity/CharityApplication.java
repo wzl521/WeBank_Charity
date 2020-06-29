@@ -416,6 +416,119 @@ public class CharityApplication {
         }
     }
 
+    // 根据item_id得到publisher_name
+// privateKey: 私钥
+// item_id
+// 返回: 根据item_id得到publisher_name
+    @GetMapping("/get_item_publisher_name")
+    public String get_item_publisher_name(@RequestParam(value = "privateKey", required=true) String privateKey,
+                                 @RequestParam(value = "item_id", required=true) BigInteger item_id
+    ) throws Exception {
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+
+            String publisher_name = charity.getItem0(item_id).send().getValue2();
+
+            return publisher_name;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+    // 根据item_id得到item_name
+// privateKey: 私钥
+// item_id
+// 返回: 根据item_id得到item_name
+    @GetMapping("/get_item_item_name")
+    public String get_item_item_name(@RequestParam(value = "privateKey", required=true) String privateKey,
+                                          @RequestParam(value = "item_id", required=true) BigInteger item_id
+    ) throws Exception {
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+
+            String item_name = charity.getItem0(item_id).send().getValue3();
+            return item_name;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+    // 根据item_id得到target_amount
+// privateKey: 私钥
+// item_id
+// 返回: 根据item_id得到target_amount
+    @GetMapping("/get_item_target_amount")
+    public BigInteger get_item_target_amount(@RequestParam(value = "privateKey", required=true) String privateKey,
+                                     @RequestParam(value = "item_id", required=true) BigInteger item_id
+    ) throws Exception {
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+
+            BigInteger target_amount = charity.getItem0(item_id).send().getValue5();
+            return target_amount;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
+    // 根据item_id得到description
+// privateKey: 私钥
+// item_id
+// 返回: 根据item_id得到description
+    @GetMapping("/get_item_description")
+    public String get_item_description(@RequestParam(value = "privateKey", required=true) String privateKey,
+                                             @RequestParam(value = "item_id", required=true) BigInteger item_id
+    ) throws Exception {
+
+        //通过指定外部账户私钥使用指定的外部账户
+        Credentials credentials = GenCredential.create(privateKey);
+        //账户地址
+        String address = credentials.getAddress();
+
+        try {
+            String contractAddress = loadOrDeploy();
+            Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
+            System.out.println(" load Charity success, contract address is " + contractAddress);
+            recordAssetAddr(contractAddress);
+
+            String description = charity.getItem1(item_id).send().getValue2();
+            return description;
+        } catch (Exception e2) {
+            System.out.println(" load Charity contract failed, error message is  " + e2.getMessage());
+            return null;
+        }
+    }
+
     // 得到所有项目
 // privateKey: 私钥
 // 返回: allItemsId
