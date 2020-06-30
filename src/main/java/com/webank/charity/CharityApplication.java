@@ -716,9 +716,13 @@ public class CharityApplication {
             String contractAddress = loadOrDeploy();
             Credentials credentials = GenCredential.create(privateKey);
             Charity charity = Charity.load(contractAddress, web3j, credentials, new StaticGasProvider(gasPrice, gasLimit));
-            String rid = charity.donate(amount, id).send().getOutput();
+            TransactionReceipt trans = charity.donate(amount, id).send();
+            List<Charity.DonateEventEventResponse> responses = charity.getDonateEventEvents(trans);
+            BigInteger ret_code = responses.get(0).ret_code;
+            BigInteger rid = responses.get(0).id;
+            logger.info("ret: {}, id: {}", ret_code, id);
 
-            return String.format("{succeed:%d, id:%s}", 1, rid);
+            return String.format("{succeed:%d, id:%d}", 1, rid);
         } catch (Exception e) {
             logger.error("Donate failed! Message: {}.", e.getMessage());
             return String.format("{succeed:%d, error:\"%s\"}", 0, e.getMessage());

@@ -47,7 +47,7 @@ contract Charity {
     event updateItemEvent();
     event cancelItemEvent(int256 ret_code);
     event pushItemEvent(int256 ret_code);
-    event donateEvent(uint256 id, address from, address to);
+    event donateEvent(int256 ret_code, uint256 id);
     event undoDonateEvent();
 	
 
@@ -83,7 +83,7 @@ contract Charity {
 
             entry.set("item_id", uint2str(item_id));
             entry.set("item_name", item_name);
-            entry.set("publisher_address", msg.sender);
+            // entry.set("publisher_address", msg.sender);
             entry.set("publisher_name", account[msg.sender].name);
             entry.set("beneficiary_name", beneficiary_name);
             entry.set("target_amount", target_amount);
@@ -293,8 +293,10 @@ contract Charity {
         string memory status;
 
         (ret, _to) = getItemPublisher(_id);
-        if(ret != 0)
+        if(ret != 0) {
+            emit donateEvent(-1, _rid);
             revert("Nonexistent item");
+        }
         (ret, publisher_name, item_name, beneficiary_name, target_amount) = getItem0(_id);
         (ret, description, donation_amount, num_of_donation, status) = getItem1(_id);
 
@@ -308,7 +310,9 @@ contract Charity {
             uint256 _rid = uint256(keccak256(now, msg.sender, randNonce));
             randNonce++;
             records[_rid] = Record(msg.sender, _to, _rid, _money, _id);
-            emit donateEvent(_rid, msg.sender, _to);
+            emit donateEvent(0, _rid);
+        } else {
+            emit donateEvent(-2, _rid);
         }
     }
 
