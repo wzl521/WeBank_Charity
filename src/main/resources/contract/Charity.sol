@@ -300,19 +300,23 @@ contract Charity {
         (ret, publisher_name, item_name, beneficiary_name, target_amount) = getItem0(_id);
         (ret, description, donation_amount, num_of_donation, status) = getItem1(_id);
 
-        if (_money > 0 && _money < account[msg.sender].balance) {
-            account[msg.sender].balance -= _money;
-            account[_to].balance += _money;
-            account[msg.sender].partItemsId.push(_id);
-            donation_amount += _money;
-            num_of_donation += 1;
-            updateItem(_id, item_name, beneficiary_name, target_amount, description, donation_amount, num_of_donation);
-            uint256 _rid = uint256(keccak256(now, msg.sender, randNonce));
-            randNonce++;
-            records[_rid] = Record(msg.sender, _to, _rid, _money, _id);
-            emit donateEvent(0, _rid);
+        if (keccak256(status) == keccak256("available")) {
+            if (_money > 0 && _money < account[msg.sender].balance) {
+                account[msg.sender].balance -= _money;
+                account[_to].balance += _money;
+                account[msg.sender].partItemsId.push(_id);
+                donation_amount += _money;
+                num_of_donation += 1;
+                updateItem(_id, item_name, beneficiary_name, target_amount, description, donation_amount, num_of_donation);
+                uint256 _rid = uint256(keccak256(now, msg.sender, randNonce));
+                randNonce++;
+                records[_rid] = Record(msg.sender, _to, _rid, _money, _id);
+                emit donateEvent(0, _rid);
+            } else {
+                emit donateEvent(-2, _rid);
+            }
         } else {
-            emit donateEvent(-2, _rid);
+            emit donateEvent(-3, _rid);
         }
     }
 

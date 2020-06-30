@@ -721,8 +721,15 @@ public class CharityApplication {
             BigInteger ret_code = responses.get(0).ret_code;
             BigInteger rid = responses.get(0).id;
             logger.info("ret: {}, id: {}", ret_code, id);
-
-            return String.format("{succeed:%d, id:%d}", 1, rid);
+            if(ret_code.equals(BigInteger.ZERO))
+                return String.format("{succeed:%d, id:%d}", 1, rid);
+            else if(ret_code.equals(new BigInteger("-1")))
+                return String.format("{succeed:%d, error:\"%s\"}", 0, "Nonexistent item");
+            else if(ret_code.equals(new BigInteger("-2")))
+                return String.format("{succeed:%d, error:\"%s\"}", 0, "Balance not enough");
+            else if(ret_code.equals(new BigInteger("-3")))
+                return String.format("{succeed:%d, error:\"%s\"}", 0, "Item closed");
+            else return String.format("{succeed:%d, error:\"%s\"}", 0, "Unhandled error");
         } catch (Exception e) {
             logger.error("Donate failed! Message: {}.", e.getMessage());
             return String.format("{succeed:%d, error:\"%s\"}", 0, e.getMessage());
